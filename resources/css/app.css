@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+/*
+//This block replaces tailwind.config.js
+@theme {
+  --color-brand-primary: #ff2d20;
+}
+@layer components {
+  .my-custom-button {
+    @apply bg-blue-500 px-4 py-2 rounded;
+  }
+} */
+@layer components {
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 m-0.5 rounded text-xs font-medium;
+  }
+  .badge-blue {
+    @apply bg-blue-100 text-blue-800;
+  }
+  .badge-green {
+    @apply bg-green-100 text-green-800;
+  }
+}
