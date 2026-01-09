@@ -10,12 +10,20 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:users.view')->only(['index', 'show']);
+        $this->middleware('permission:users.create')->only(['store']);
+        $this->middleware('permission:users.update')->only(['update']);
+        $this->middleware('permission:users.delete')->only(['destroy']);
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $user = User::where('id','<>',auth()->id())->get();
+        $user = User::where('id','<>',auth()->id())->paginate(10);
         return UserResource::collection($user);
     }
 

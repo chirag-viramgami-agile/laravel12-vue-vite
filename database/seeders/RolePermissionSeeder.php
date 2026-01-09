@@ -2,41 +2,70 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RolePermissionSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Reset cached roles & permissions
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
-        // Permissions
-        $userPermissions = [
-            'view_dashboard',
-        ];
         $permissions = [
-            'manage_users',
-            'manage_roles',
-            ...$userPermissions,
+            // Core
+            'view_dashboard',
+
+            // Users
+            'users.view',
+            'users.create',
+            'users.update',
+            'users.delete',
+
+            // Roles
+            'roles.view',
+            'roles.create',
+            'roles.update',
+            'roles.delete',
+
+            // CRM
+            'customers.view',
+            'customers.create',
+            'customers.update',
+            'customers.delete',
+
+            'leads.view',
+            'leads.create',
+            'leads.update',
+            'leads.delete',
+
+            'deals.view',
+            'deals.create',
+            'deals.update',
+            'deals.delete',
+
+            // Settings
+            'settings.view',
+            'settings.update',
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Roles
         $admin = Role::firstOrCreate(['name' => 'admin']);
-        $user = Role::firstOrCreate(['name' => 'user']);
+        $user  = Role::firstOrCreate(['name' => 'user']);
 
-        // Assign permissions
-        $admin->givePermissionTo($permissions);
-        $user->givePermissionTo($userPermissions);
+        // Admin = everything
+        $admin->syncPermissions($permissions);
+
+        // Normal user = read-only CRM
+        $user->syncPermissions([
+            'view_dashboard',
+            'customers.view',
+            'leads.view',
+            'deals.view',
+        ]);
     }
 }

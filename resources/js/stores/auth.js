@@ -22,14 +22,21 @@ export const useAuthStore = defineStore("auth", () => {
         return permissions.value.includes(permission);
     };
 
+    const setUser = (data) => {
+        user.value = {
+            ...data,
+            permissions: [...new Set(data.permissions ?? [])],
+            roles: [...new Set(data.roles ?? [])],
+        };
+    };
     // actions
-    const fetchUser = async () => {
-        if (initialized.value || loading.value) return;
+    const fetchUser = async (force = false) => {
+        if ((initialized.value && !force) || loading.value) return;
         loading.value = true;
 
         try {
             const res = await axios.get("/api/me", { skipAuthRedirectForLogin: true });
-            user.value = res.data;
+            setUser(res.data);
         } catch (err) {
             user.value = null;
         } finally {
@@ -43,7 +50,7 @@ export const useAuthStore = defineStore("auth", () => {
         await axios.get("/sanctum/csrf-cookie");
         const { data } = await axios.post("/api/login", { email, password });
 
-        user.value = data.user;
+        setUser(data.user);
         initialized.value = true;
     };
 
@@ -67,6 +74,7 @@ export const useAuthStore = defineStore("auth", () => {
         // getters
         isAuthenticated,
         roles,
+        permissions,
         hasRole,
         can,
 

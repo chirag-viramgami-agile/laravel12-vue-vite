@@ -11,9 +11,9 @@ const SERVICE_URI = "/api/admin/users";
 /**
  * @returns {Promise<User[]>}
  */
-export async function fetchUsers() {
-    const res = await axios.get(SERVICE_URI);
-    return res.data.data;
+export async function fetchUsers(page = 1) {
+    const res = await axios.get(`${SERVICE_URI}?page=${page}`);
+    return res;
 
     return {
         items: res.data.data,

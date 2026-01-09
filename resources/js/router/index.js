@@ -5,7 +5,6 @@ import Dashboard from "@/pages/Dashboard.vue";
 import Users from "@/pages/users/Index.vue";
 import UserCreate from "@/pages/users/Create.vue";
 import UserEdit from "@/pages/users/Edit.vue";
-import { usePermissions } from "@/composables/usePermissions.js";
 
 const routes = [
     // Home routes
@@ -39,22 +38,24 @@ const routes = [
             },
             {
                 path: "users",
-                meta: { permission: PERMISSIONS.MANAGE_USERS },
                 children: [
                     {
                         path: "",
                         name: "user-list",
                         component: Users,
+                        meta: { permission: PERMISSIONS.USERS_VIEW },
                     },
                     {
                         path: "create",
                         name: "user-create",
                         component: UserCreate,
+                        meta: { permission: PERMISSIONS.USERS_CREATE },
                     },
                     {
                         path: "edit/:id",
                         name: "user-edit",
                         component: UserEdit,
+                        meta: { permission: PERMISSIONS.USERS_UPDATE },
                         props: true,
                     },
                 ],
@@ -98,14 +99,19 @@ const router = createRouter({
 // middleware
 router.beforeEach(async (to) => {
     const auth = useAuthStore();
-    const { can } = usePermissions();
     // Do nothing until auth is resolved
     await auth.fetchUser();
 
+    // Checks all parent/child permissions
     const requiredPermission = [...to.matched]
-    .reverse()
-    .map(r => r.meta.permission)
-    .find(Boolean);
+      .reverse()
+      .map(r => r.meta.permission)
+      .find(Boolean);
+
+    // If we are heading to 403, "from" is our previous page
+    if (to.path === '/403') {
+        to.query.from = from.fullPath;
+    }
 
     // Guest-only routes (login)
     if (to.meta.guest && auth.isAuthenticated) {
@@ -116,9 +122,8 @@ router.beforeEach(async (to) => {
     if (to.meta.requiresAuth && !auth.isAuthenticated) {
         return "/login";
     }
-
     // Permission-based UI guard
-    if (to.meta.permission && !can(to.meta.permission)) {
+    if (requiredPermission && !auth.can(requiredPermission)) {
         return "/403";
     }
 });

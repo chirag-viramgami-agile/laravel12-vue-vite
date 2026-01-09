@@ -20,4 +20,13 @@
   .badge-green {
     @apply bg-green-100 text-green-800;
   }
+
+  /* Pagination */
+  .paginations button {
+    @apply !px-3 !py-1 !rounded-md;
+  }
+
+  .paginations button[aria-current="page"] {
+    @apply !bg-blue-600 !text-white !border-blue-600;
+  }
 }

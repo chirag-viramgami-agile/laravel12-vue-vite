@@ -2,6 +2,7 @@
 import Button from '@/components/Button.vue'
 import { onMounted, reactive } from 'vue';
 import { listData } from '@/services/role.service'
+import { PERMISSIONS } from '@/constants/permissions';
 
 const roles = reactive({});
 onMounted(async () => {
@@ -19,7 +20,7 @@ onMounted(async () => {
                 Roles
             </h1>
 
-            <Button :to="{name:'role-create'}">Create</Button>
+            <Button v-if="$can(PERMISSIONS.USERS_CREATE)" :to="{name:'role-create'}">Create</Button>
         </div>
 
         <div class="bg-white rounded shadow overflow-hidden">

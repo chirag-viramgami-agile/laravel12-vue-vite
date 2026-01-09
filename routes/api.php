@@ -19,23 +19,10 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
 
 
 Route::group(['middleware'=>['auth:sanctum']],function () {
-    Route::get('/me', function (Request $request) {
-        $user = $request->user();
-        return response()->json([
-            'id' => $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
+    Route::get('/me',[HomeController::class,'me']);
 
-            // flattened, explicit
-            'roles' => $user->roles->pluck('name'),
-
-            // resolved, authoritative permissions
-            'permissions' => $user->getAllPermissions()->pluck('name'),
-        ]);
-    });
-
-    Route::apiResource('/admin/dashboard', HomeController::class)->middleware(['permission:manage_users']);
-    Route::apiResource('/admin/users', UserController::class)->middleware(['permission:manage_users']);
-    Route::apiResource('/admin/roles', RoleController::class)->middleware(['permission:manage_roles']);
-    Route::get('/admin/permissions', [RoleController::class,'permissions'])->middleware(['permission:manage_roles']);
+    Route::get('/admin/dashboard', [HomeController::class ,'dashboard']);
+    Route::apiResource('/admin/users', UserController::class);
+    Route::apiResource('/admin/roles', RoleController::class);
+    Route::get('/admin/permissions', [RoleController::class,'permissions']);
 });

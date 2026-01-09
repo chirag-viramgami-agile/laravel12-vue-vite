@@ -7,9 +7,17 @@ use App\Http\Resources\RoleResource;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class RoleController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('permission:roles.view')->only(['index', 'show']);
+        $this->middleware('permission:roles.create')->only(['store']);
+        $this->middleware('permission:roles.update')->only(['update']);
+        $this->middleware('permission:roles.delete')->only(['destroy']);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -77,6 +85,8 @@ class RoleController extends Controller
 
         // Always sync — predictable behavior
         $role->syncPermissions($data['permissions'] ?? []);
+        
+        app(PermissionRegistrar::class)->forgetCachedPermissions();
 
         return new RoleResource($role);
     }
